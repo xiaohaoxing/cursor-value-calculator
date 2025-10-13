@@ -1,0 +1,16 @@
+{
+  "ext_name": {"message": "Cursor 用量金额浮窗"},
+  "ext_short_name": {"message": "Cursor 金额"},
+  "ext_description": {"message": "在 Cursor 使用量页面统计金额并显示浮窗。"},
+
+  "overlay_title": {"message": "用量金额合计"},
+  "overlay_close_aria": {"message": "关闭"},
+  "overlay_details": {
+    "message": "(共 $COUNT$ 条金额)",
+    "placeholders": {"count": {"content": "$1"}}
+  },
+  "overlay_range": {
+    "message": "从 $FROM$ 到 $TO$ 时段内统计",
+    "placeholders": {"from": {"content": "$1"}, "to": {"content": "$2"}}
+  }
+}

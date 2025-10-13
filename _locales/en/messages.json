@@ -1,0 +1,16 @@
+{
+  "ext_name": {"message": "Cursor Usage Cost Overlay"},
+  "ext_short_name": {"message": "Cursor Cost"},
+  "ext_description": {"message": "Sum up all USD amounts on Cursor Usage page and show an overlay."},
+
+  "overlay_title": {"message": "Total Amount"},
+  "overlay_close_aria": {"message": "Close"},
+  "overlay_details": {
+    "message": "($COUNT$ items)",
+    "placeholders": {"count": {"content": "$1"}}
+  },
+  "overlay_range": {
+    "message": "From $FROM$ to $TO$",
+    "placeholders": {"from": {"content": "$1"}, "to": {"content": "$2"}}
+  }
+}
