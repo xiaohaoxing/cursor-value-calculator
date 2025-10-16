@@ -144,6 +144,28 @@
     return `${y}-${m}-${d} ${hh}:${mm}:${ss}`;
   }
 
+  function formatMonthDay(dt) {
+    if (!dt) return '';
+    try {
+      // Always format in English
+      return new Intl.DateTimeFormat('en-US', {
+        month: 'short',
+        day: '2-digit',
+      }).format(dt);
+    } catch {
+      return `${pad2(dt.getMonth() + 1)}-${pad2(dt.getDate())}`;
+    }
+  }
+
+  function daysBetweenInclusive(from, to) {
+    if (!from || !to) return 0;
+    const start = new Date(from.getFullYear(), from.getMonth(), from.getDate());
+    const end = new Date(to.getFullYear(), to.getMonth(), to.getDate());
+    const msPerDay = 24 * 60 * 60 * 1000;
+    const diff = Math.round((end - start) / msPerDay) + 1;
+    return diff > 0 ? diff : 0;
+  }
+
   function formatUSD(value) {
     try {
       return new Intl.NumberFormat(undefined, {
@@ -158,14 +180,7 @@
   }
 
   function t(id, ...args) {
-    try {
-      // chrome.i18n may be undefined in some environments; fallback to en strings inline if needed
-      const s = typeof chrome !== 'undefined' && chrome.i18n && chrome.i18n.getMessage
-        ? chrome.i18n.getMessage(id, args)
-        : null;
-      if (s) return s;
-    } catch {}
-    // fallback literals (English)
+    // Force English literals regardless of browser/extension locale
     const fallbacks = {
       overlay_title: 'Total Amount',
       overlay_close_aria: 'Close',
@@ -288,10 +303,14 @@
     const detailsEl = overlay.querySelector('[data-role="details"]');
     const rangeEl = overlay.querySelector('[data-role="range"]');
     if (valueEl) valueEl.textContent = formatUSD(total);
-    if (detailsEl) detailsEl.textContent = t('overlay_details', String(count));
+    if (detailsEl) detailsEl.textContent = `(${count} ${count === 1 ? 'item' : 'items'})`;
     if (rangeEl) {
       if (from && to) {
-        rangeEl.textContent = t('overlay_range', formatDateTime(from), formatDateTime(to));
+        const fromStr = formatMonthDay(from);
+        const toStr = formatMonthDay(to);
+        const days = daysBetweenInclusive(from, to);
+        const daysText = ` (last ${days} ${days === 1 ? 'day' : 'days'})`;
+        rangeEl.textContent = `From ${fromStr} to ${toStr}${daysText}`;
       } else {
         rangeEl.textContent = "";
       }
