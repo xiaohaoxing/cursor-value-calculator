@@ -257,6 +257,79 @@
     overlay.appendChild(row);
     overlay.appendChild(rangeRow);
 
+    // Feedback button (bottom-right)
+    const feedbackBtn = document.createElement("a");
+    feedbackBtn.href = "https://github.com/xiaohaoxing/cursor-value-calculator/issues";
+    feedbackBtn.target = "_blank";
+    feedbackBtn.rel = "noopener noreferrer";
+    feedbackBtn.setAttribute("aria-label", "send feedback");
+    feedbackBtn.textContent = "?";
+    feedbackBtn.style.position = "absolute";
+    feedbackBtn.style.bottom = "6px";
+    feedbackBtn.style.right = "6px";
+    feedbackBtn.style.width = "18px";
+    feedbackBtn.style.height = "18px";
+    feedbackBtn.style.lineHeight = "18px";
+    feedbackBtn.style.textAlign = "center";
+    feedbackBtn.style.borderRadius = "50%";
+    feedbackBtn.style.background = "#2563EB";
+    feedbackBtn.style.color = "#F9FAFB";
+    feedbackBtn.style.fontWeight = "700";
+    feedbackBtn.style.fontSize = "12px";
+    feedbackBtn.style.textDecoration = "none";
+    feedbackBtn.style.boxShadow = "0 2px 6px rgba(0,0,0,0.25)";
+    feedbackBtn.style.opacity = "0.9";
+    feedbackBtn.style.cursor = "pointer";
+    feedbackBtn.addEventListener("mouseenter", () => (feedbackBtn.style.opacity = "1"));
+    feedbackBtn.addEventListener("mouseleave", () => (feedbackBtn.style.opacity = "0.9"));
+    overlay.appendChild(feedbackBtn);
+
+    // Fast tooltip for feedback (replaces native title, quicker show)
+    const tooltipEl = document.createElement("div");
+    tooltipEl.textContent = "send feedback";
+    tooltipEl.style.position = "absolute";
+    tooltipEl.style.bottom = "28px"; // above the button
+    tooltipEl.style.right = "6px";
+    tooltipEl.style.background = "#374151"; // gray-700
+    tooltipEl.style.color = "#F9FAFB"; // gray-50
+    tooltipEl.style.padding = "4px 6px";
+    tooltipEl.style.borderRadius = "6px";
+    tooltipEl.style.fontSize = "11px";
+    tooltipEl.style.whiteSpace = "nowrap";
+    tooltipEl.style.boxShadow = "0 4px 12px rgba(0,0,0,0.25)";
+    tooltipEl.style.pointerEvents = "none";
+    tooltipEl.style.opacity = "0";
+    tooltipEl.style.transform = "translateY(4px)";
+    tooltipEl.style.transition = "opacity 120ms ease, transform 120ms ease";
+    overlay.appendChild(tooltipEl);
+
+    let tooltipShowTimer = null;
+    let tooltipHideTimer = null;
+    const showTooltip = () => {
+      tooltipEl.style.opacity = "1";
+      tooltipEl.style.transform = "translateY(0)";
+    };
+    const hideTooltip = () => {
+      tooltipEl.style.opacity = "0";
+      tooltipEl.style.transform = "translateY(4px)";
+    };
+    feedbackBtn.addEventListener("mouseenter", () => {
+      if (tooltipHideTimer) clearTimeout(tooltipHideTimer);
+      tooltipShowTimer = setTimeout(showTooltip, 80); // quicker show
+    });
+    feedbackBtn.addEventListener("mouseleave", () => {
+      if (tooltipShowTimer) clearTimeout(tooltipShowTimer);
+      tooltipHideTimer = setTimeout(hideTooltip, 100);
+    });
+    feedbackBtn.addEventListener("focus", () => {
+      if (tooltipHideTimer) clearTimeout(tooltipHideTimer);
+      tooltipShowTimer = setTimeout(showTooltip, 80);
+    });
+    feedbackBtn.addEventListener("blur", () => {
+      if (tooltipShowTimer) clearTimeout(tooltipShowTimer);
+      tooltipHideTimer = setTimeout(hideTooltip, 100);
+    });
+
     closeBtn.addEventListener("click", () => {
       overlay.remove();
     });
@@ -268,7 +341,8 @@
     let startRight = 0;
     let startTop = 0;
     overlay.addEventListener("mousedown", (e) => {
-      if ((e.target || e.srcElement) === closeBtn) return; // allow close
+      const targetEl = (e.target || e.srcElement);
+      if (targetEl === closeBtn || targetEl === feedbackBtn) return; // allow close/feedback
       isDragging = true;
       startX = e.clientX;
       startY = e.clientY;

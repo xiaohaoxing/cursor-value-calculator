@@ -33,7 +33,7 @@ Replace TODO fields with your actual info.
 - Support contact: GitHub Issues or email: TODO add contact email.
 
 ## Version & Notes
-- Version (manifest `version`): 0.1.0 (increment per release).
+- Version (manifest `version`): 0.2.0 (increment per release).
 - Release notes: list key changes.
 
 ---

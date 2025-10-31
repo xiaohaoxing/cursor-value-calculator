@@ -33,7 +33,7 @@
 - 支持联系：仓库 Issues 或邮箱：TODO 填写联系邮箱。
 
 ## 版本与变更
-- 版本号（manifest `version`）：0.1.0（按需递增）。
+- 版本号（manifest `version`）：0.2.0（按需递增）。
 - 发行说明（Release notes）：简要罗列本次更新要点。
 
 ---
