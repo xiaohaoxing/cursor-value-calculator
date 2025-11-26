@@ -12,7 +12,7 @@
       return (
         (url.pathname.includes("/dashboard") || url.pathname === "/") &&
         (url.searchParams.get("tab")?.toLowerCase() === "usage" ||
-          document.querySelector('[data-testid="usage-table"], table'))
+          document.querySelector('[data-testid="usage-table"], table, .dashboard-table-container'))
       );
     } catch {
       return false;
@@ -49,18 +49,23 @@
   }
 
   function findAmountContainers() {
-    // Known structure example:
-    // <td class="w-[100px] px-3 py-2.5 text-right">
-    //   <div class="flex items-center justify-end gap-1 cursor-help" title="$0.12 value">
-    //     <span class="text-brand-gray-400 line-through decoration-[0.5px]">$0.12</span>
-    //     <span>Included</span>
-    //   </div>
-    // </td>
+    // Known structures:
+    // 1) Old table:
+    //    <td class="text-right">
+    //      <div class="cursor-help" title="$0.12 value"><span>$0.12</span><span>Included</span></div>
+    //    </td>
+    // 2) New dashboard table:
+    //    <div role="cell" class="dashboard-table-cell dashboard-table-cell-align-right">
+    //      <div class="flex ... cursor-help" title="$0.12"><span>$0.12</span><span>Included</span></div>
+    //    </div>
 
     const selectors = [
       'td.text-right div.cursor-help[title*="$"]',
       'td.text-right [title*="$"]',
       'td.text-right span:has(+ span)', // heuristic: price + label
+      // New structure: right-aligned cost cell with title on inner div
+      '.dashboard-table-cell.dashboard-table-cell-align-right .cursor-help[title*="$"]',
+      '.dashboard-table-cell.dashboard-table-cell-align-right [title*="$"]',
     ];
     const results = new Set();
     selectors.forEach((sel) => {
@@ -84,17 +89,23 @@
   }
 
   function findRowForAmountElement(el) {
-    return el.closest?.("tr") || null;
+    // Support both old <tr> rows and new <div role="row"> rows
+    return el.closest?.("tr, [role=\"row\"], .dashboard-table-row") || null;
   }
 
   function parseDateFromRow(row) {
     if (!row) return null;
-    // Prefer first td with a title attribute (e.g., "Sep 10, 2025, 05:04:24 PM")
-    const firstTd = row.querySelector('td[title]') || row.querySelector('td');
-    if (!firstTd) return null;
+    // Prefer the first cell in the row; for new DOM this is [role="cell"] with an inner span[title]
+    // Fallbacks keep compatibility with old <td> structure.
+    const targetEl =
+      row.querySelector?.('[role="cell"] [title]') ||
+      row.querySelector?.('[role="cell"]') ||
+      row.querySelector?.('td[title]') ||
+      row.querySelector?.('td');
+    if (!targetEl) return null;
 
     // Try title attribute
-    const title = firstTd.getAttribute?.('title') || '';
+    const title = targetEl.getAttribute?.('title') || '';
     let dt = null;
     if (title) {
       const d = new Date(title);
@@ -103,7 +114,7 @@
 
     // Fallback: parse text content like "Sep 10, 05:04 PM" (no year). Assume current year.
     if (!dt) {
-      const txt = (firstTd.textContent || '').trim();
+      const txt = (targetEl.textContent || '').trim();
       if (txt) {
         const assumed = `${txt} ${new Date().getFullYear()}`;
         const d2 = new Date(assumed);
